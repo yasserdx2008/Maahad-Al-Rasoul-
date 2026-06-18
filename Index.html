@@ -1,134 +1,660 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Pro Chat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #131314; color: #e3e3e3; }
-        .glass { background: rgba(30, 31, 32, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .chat-container::-webkit-scrollbar { width: 6px; }
-        .chat-container::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .typing-dot { width: 6px; height: 6px; background: #8e8e8e; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out; }
-        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
-    </style>
-</head>
-<body class="h-screen flex flex-col overflow-hidden">
 
-    <!-- Header -->
-    <header class="p-4 border-b border-white/10 flex justify-between items-center glass z-10">
-        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate__animated animate__fadeInRight">Gemini AI</h1>
-        <button onclick="clearChat()" class="text-xs text-gray-400 hover:text-red-400 transition-colors">مسح المحادثة</button>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ياسر رعد | مبرمج محترف</title>
+
+  <!-- Google Fonts (دعم العربية) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome 6 (أيقونات) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #0a0c10;
+      color: #eef2f7;
+      line-height: 1.7;
+      overflow-x: hidden;
+      direction: rtl;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ===== خلفية متحركة (جزيئات) ===== */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== الحاوية الرئيسية ===== */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ===== HEADER / HERO ===== */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2.5rem 0 4rem;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 2rem;
+      border-radius: 60px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+      transition: 0.3s;
+    }
+    .hero-badge i {
+      margin-left: 0.5rem;
+    }
+
+    .hero h1 {
+      font-size: 4.2rem;
+      font-weight: 900;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #c4b5fd, #818cf8, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 40px rgba(96, 165, 250, 0.2);
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+
+    .hero .subtitle {
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+      letter-spacing: 2px;
+    }
+
+    .hero .highlight {
+      color: #a5b4fc;
+      font-weight: 700;
+      border-bottom: 3px solid #818cf8;
+      padding-bottom: 0.2rem;
+    }
+
+    .hero-desc {
+      max-width: 700px;
+      font-size: 1.2rem;
+      color: #94a3b8;
+      margin: 1.5rem auto 2.5rem;
+      line-height: 1.9;
+    }
+
+    /* أزرار CTA */
+    .btn-group {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.9rem 2.8rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(4px);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, #4f46e5, #6366f1);
+      border-color: #818cf8;
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 14px 40px rgba(99, 102, 241, 0.5);
+      background: linear-gradient(145deg, #6366f1, #818cf8);
+    }
+
+    .btn-outline {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: transparent;
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #a5b4fc;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ===== SERVICES (بطاقات احترافية) ===== */
+    .section-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 5rem 0 2rem;
+      position: relative;
+    }
+    .section-title span {
+      background: linear-gradient(135deg, #a5b4fc, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #4f46e5, #818cf8);
+      margin: 0.6rem auto 0;
+      border-radius: 10px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 2.5rem;
+      margin-top: 2rem;
+    }
+
+    .service-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 36px;
+      padding: 2.8rem 2rem 2.5rem;
+      text-align: center;
+      transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.08), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s;
+      pointer-events: none;
+    }
+    .service-card:hover::before {
+      opacity: 1;
+    }
+
+    .service-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 30px 60px -15px rgba(99, 102, 241, 0.3);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .service-icon {
+      font-size: 3.8rem;
+      background: linear-gradient(145deg, #4f46e5, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.2rem;
+      display: inline-block;
+      transition: 0.3s;
+    }
+    .service-card:hover .service-icon {
+      transform: scale(1.1) rotate(-3deg);
+    }
+
+    .service-card h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #f1f5f9;
+    }
+
+    .service-card p {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .service-tag {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.15);
+      padding: 0.3rem 1.5rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ===== إحصائيات / أرقام ===== */
+    .stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4rem;
+      margin: 4.5rem 0 2rem;
+      padding: 2.5rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 80px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #a5b4fc, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    .stat-label {
+      font-size: 1rem;
+      color: #94a3b8;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+
+    /* ===== ABOUT / BIO ===== */
+    .about-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 3rem;
+      margin: 5rem 0 3rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 60px;
+      padding: 3rem 2.5rem;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .about-text {
+      flex: 2;
+      min-width: 280px;
+    }
+    .about-text h2 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .about-text h2 i {
+      color: #818cf8;
+      margin-left: 0.8rem;
+    }
+    .about-text p {
+      color: #cbd5e1;
+      font-size: 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .about-avatar {
+      flex: 1;
+      min-width: 180px;
+      text-align: center;
+    }
+    .avatar-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #4f46e5, #818cf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 5rem;
+      color: #fff;
+      box-shadow: 0 20px 50px rgba(99, 102, 241, 0.3);
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      transition: 0.4s;
+    }
+    .avatar-circle:hover {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 30px 70px rgba(99, 102, 241, 0.5);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      margin-top: 5rem;
+      text-align: center;
+      padding: 2rem 0 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+    footer .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    footer .social-links a {
+      font-size: 1.8rem;
+      color: #94a3b8;
+      transition: 0.3s;
+      display: inline-block;
+    }
+    footer .social-links a:hover {
+      color: #a5b4fc;
+      transform: translateY(-5px);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.8rem;
+      }
+      .hero .subtitle {
+        font-size: 1.2rem;
+      }
+      .section-title {
+        font-size: 2.2rem;
+      }
+      .stats {
+        gap: 2rem;
+        padding: 1.8rem 0.5rem;
+        border-radius: 40px;
+      }
+      .stat-number {
+        font-size: 2.8rem;
+      }
+      .about-section {
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+      .about-avatar {
+        order: -1;
+      }
+      .avatar-circle {
+        width: 140px;
+        height: 140px;
+        font-size: 4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      .btn-group .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0c10;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4f46e5;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== قماش الجزيئات (خلفية متحركة) ===== -->
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="container">
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+      <div class="hero-badge">
+        <i class="fas fa-code"></i> مبرمج محترف
+      </div>
+      <h1>ياسر رعد</h1>
+      <p class="subtitle">
+        <span class="highlight">#مطور_ويب</span> &amp; <span class="highlight">#مصمم_إبداعي</span>
+      </p>
+      <p class="hero-desc">
+        أحول الأفكار إلى تجارب رقمية ساحرة. أدمج بين البرمجة والتصميم لأصنع هوية بصرية فريدة.
+      </p>
+      <div class="btn-group">
+        <a href="#services" class="btn btn-primary">
+          <i class="fas fa-rocket"></i> استكشف الخدمات
+        </a>
+        <a href="#contact" class="btn btn-outline">
+          <i class="fas fa-paper-plane"></i> تواصل معي
+        </a>
+      </div>
     </header>
 
-    <!-- Chat Area -->
-    <main id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6 chat-container scroll-smooth">
-        <div class="text-center mt-20 animate__animated animate__fadeIn">
-            <div class="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <h2 class="text-2xl font-semibold">كيف يمكنني مساعدتك اليوم؟</h2>
-        </div>
-    </main>
+    <!-- ===== SERVICES ===== -->
+    <h2 class="section-title" id="services"><span>خدماتي الاحترافية</span></h2>
+    <div class="services-grid">
 
-    <!-- Input Area -->
-    <footer class="p-4 pb-8 glass">
-        <div class="max-w-4xl mx-auto relative">
-            <div id="typingIndicator" class="hidden absolute -top-8 right-2 flex space-x-1 space-x-reverse">
-                <div class="typing-dot" style="animation-delay: -0.32s"></div>
-                <div class="typing-dot" style="animation-delay: -0.16s"></div>
-                <div class="typing-dot"></div>
-            </div>
-            <div class="relative flex items-center">
-                <input type="text" id="userInput" placeholder="اسأل Gemini..." 
-                    class="w-full bg-[#282a2d] border border-transparent focus:border-blue-500 rounded-2xl py-4 pr-6 pl-14 outline-none transition-all shadow-2xl">
-                <button onclick="sendMessage()" class="absolute left-3 p-2 bg-white rounded-xl hover:bg-gray-200 transition-transform active:scale-90">
-                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                </button>
-            </div>
-            <p class="text-[10px] text-center mt-3 text-gray-500">يعمل بواسطة Google Gemini API - يتم الحفظ محلياً</p>
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
+        <h3>تصميم وبرمجة ويب</h3>
+        <p>مواقع تفاعلية، متجاوبة، بأحدث التقنيات (HTML, CSS, JS, React, Vue).</p>
+        <span class="service-tag"><i class="far fa-star"></i> احترافي</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
+        <h3>تصميم صور وواجهات</h3>
+        <p>هويات بصرية، شعارات، بانرات، واجهات UI/UX جذابة تعكس شخصية علامتك.</p>
+        <span class="service-tag"><i class="far fa-gem"></i> إبداعي</span>
+      </div>
+
+      <!-- تم حذف بطاقة تطبيقات الجوال كما طُلب -->
+
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <h3>استضافة ورفع على GitHub</h3>
+        <p>نشر مشاريعك على GitHub Pages، Netlify، Vercel مع تكامل مستمر.</p>
+        <span class="service-tag"><i class="fas fa-check-circle"></i> موثوق</span>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-number">15+</div>
+        <div class="stat-label">مشروع منفذ</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4.9</div>
+        <div class="stat-label">تقييم العملاء</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">التزام بالمواعيد</div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ===== -->
+    <div class="about-section" id="about">
+      <div class="about-text">
+        <h2><i class="fas fa-user-astronaut"></i> من أنا</h2>
+        <p>
+          مبرمج ومصمم ويب بشغف لا محدود. أؤمن بأن الواجهة الجيدة هي نصف البرنامج، 
+          وأسعى دائمًا لتقديم تجارب مستخدم استثنائية. أمتلك خبرة في تطوير المشاريع 
+          من البداية إلى النشر، مع اهتمام خاص بالتفاصيل والأداء.
+        </p>
+        <p>
+          <i class="fas fa-check-circle" style="color: #818cf8;"></i> 
+          أستخدم أدوات احترافية مثل Figma, Adobe XD, GitHub, و frameworks حديثة.
+        </p>
+      </div>
+      <div class="about-avatar">
+        <div class="avatar-circle">
+          <i class="fas fa-code"></i>
         </div>
+      </div>
+    </div>
+
+    <!-- ===== CONTACT / FOOTER ===== -->
+    <footer id="contact">
+      <div class="social-links">
+        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="#" aria-label="Dribbble"><i class="fab fa-dribbble"></i></a>
+      </div>
+      <p>
+        <i class="fas fa-envelope" style="margin-left: 0.5rem;"></i> 
+        yaser@devportfolio.com &nbsp;|&nbsp; 
+        <i class="fas fa-phone-alt" style="margin-left: 0.5rem;"></i> +966 50 123 4567
+      </p>
+      <p style="margin-top: 1.2rem; font-size: 0.85rem; color: #475569;">
+        &copy; 2026 ياسر رعد — جميع الحقوق محفوظة
+      </p>
     </footer>
+  </div>
 
-    <script>
-        // --- الإعدادات ---
-        const API_KEY = 'AIzaSyAYbcg-C7bhAInQRVi4AannO-SRCoMhi9w'; 
-        const chatContainer = document.getElementById('chatContainer');
-        const userInput = document.getElementById('userInput');
-        const typingIndicator = document.getElementById('typingIndicator');
+  <!-- ===== جافا سكريبت: خلفية الجزيئات التفاعلية ===== -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
 
-        // تحميل المحادثات المحفوظة من الهاتف
-        let history = JSON.parse(localStorage.getItem('chat_history')) || [];
-        if(history.length > 0) renderHistory();
+      let width, height;
+      let particles = [];
+      const PARTICLE_COUNT = 80;
 
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
 
-            appendMessage('user', text);
-            userInput.value = '';
-            showTyping(true);
+      class Particle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.size = Math.random() * 2.5 + 0.8;
+          this.speedX = (Math.random() - 0.5) * 0.5;
+          this.speedY = (Math.random() - 0.5) * 0.5;
+          this.opacity = Math.random() * 0.4 + 0.2;
+        }
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
-                });
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
 
-                const data = await response.json();
-                const aiResponse = data.candidates[0].content.parts[0].text;
-                
-                appendMessage('ai', aiResponse);
-                saveChat('ai', aiResponse);
-            } catch (error) {
-                appendMessage('ai', 'عذراً، حدث خطأ في الاتصال. تأكد من مفتاح API.');
-            } finally {
-                showTyping(false);
+          if (this.x < 0 || this.x > width) this.speedX *= -1;
+          if (this.y < 0 || this.y > height) this.speedY *= -1;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(160, 180, 255, ${this.opacity})`;
+          ctx.fill();
+        }
+      }
+
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push(new Particle());
+        }
+      }
+      initParticles();
+
+      function drawLines() {
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 130) {
+              const alpha = (1 - distance / 130) * 0.25;
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(130, 150, 255, ${alpha})`;
+              ctx.lineWidth = 0.7;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
             }
+          }
         }
+      }
 
-        function appendMessage(role, text) {
-            const isUser = role === 'user';
-            const msgHtml = `
-                <div class="flex ${isUser ? 'justify-end' : 'justify-start'} animate__animated ${isUser ? 'animate__fadeInLeft' : 'animate__fadeInRight'}">
-                    <div class="max-w-[85%] p-4 rounded-2xl ${isUser ? 'bg-blue-600 text-white rounded-br-none' : 'bg-[#282a2d] text-gray-200 rounded-bl-none border border-white/5'}">
-                        <p class="text-sm leading-relaxed whitespace-pre-wrap">${text}</p>
-                    </div>
-                </div>`;
-            
-            if (history.length === 0 && isUser) chatContainer.innerHTML = ''; 
-            chatContainer.insertAdjacentHTML('beforeend', msgHtml);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            if(isUser) saveChat('user', text);
-        }
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
 
-        function saveChat(role, text) {
-            history.push({ role, text });
-            localStorage.setItem('chat_history', JSON.stringify(history));
-        }
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        drawLines();
 
-        function renderHistory() {
-            chatContainer.innerHTML = '';
-            history.forEach(msg => appendMessage(msg.role, msg.text));
-        }
+        requestAnimationFrame(animate);
+      }
 
-        function clearChat() {
-            localStorage.removeItem('chat_history');
-            history = [];
-            location.reload();
-        }
+      animate();
 
-        function showTyping(show) {
-            typingIndicator.classList.toggle('hidden', !show);
-        }
+      window.addEventListener('resize', () => {
+        resize();
+        initParticles();
+      });
+    })();
+  </script>
 
-        userInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
-    </script>
 </body>
 </html>
